@@ -6,9 +6,10 @@ USE master;
 GO
 
 IF DB_ID(N'udemy_the_complete_sql_bootcamp_30_hours_go_from_zero_to_hero') IS NOT NULL
-  BEGIN
+BEGIN
   ALTER DATABASE [udemy_the_complete_sql_bootcamp_30_hours_go_from_zero_to_hero]
-    SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+      SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+
   DROP DATABASE [udemy_the_complete_sql_bootcamp_30_hours_go_from_zero_to_hero];
 END
 GO

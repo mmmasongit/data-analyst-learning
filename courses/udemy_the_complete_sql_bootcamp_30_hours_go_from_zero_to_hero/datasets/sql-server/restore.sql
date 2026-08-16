@@ -1,5 +1,16 @@
-IF DB_ID('udemy_the_complete_sql_bootcamp_30_hours_go_from_zero_to_hero') IS NOT NULL
+-- =============================================================================
+-- Restores the target database
+-- =============================================================================
+
+USE master;
+GO
+
+IF DB_ID(N'udemy_the_complete_sql_bootcamp_30_hours_go_from_zero_to_hero') IS NOT NULL
+  BEGIN
+  ALTER DATABASE [udemy_the_complete_sql_bootcamp_30_hours_go_from_zero_to_hero]
+    SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
   DROP DATABASE [udemy_the_complete_sql_bootcamp_30_hours_go_from_zero_to_hero];
+END
 GO
 
 CREATE DATABASE [udemy_the_complete_sql_bootcamp_30_hours_go_from_zero_to_hero];
@@ -8,14 +19,24 @@ GO
 USE [udemy_the_complete_sql_bootcamp_30_hours_go_from_zero_to_hero];
 GO
 
--- ======================================================
+-- =============================================================================
 -- Schema: dbo
--- ======================================================
+-- =============================================================================
 
--- ======================================================
+IF OBJECT_ID(N'dbo.customers', N'U') IS NOT NULL
+  DROP TABLE dbo.customers;
+GO
+
+IF OBJECT_ID(N'dbo.orders', N'U') IS NOT NULL
+  DROP TABLE dbo.orders;
+GO
+
+-- =============================================================================
 -- Table: dbo.customers
--- ======================================================
-CREATE TABLE dbo.customers (
+-- =============================================================================
+
+CREATE TABLE dbo.customers
+(
   id INT NOT NULL,
   first_name VARCHAR(50) NOT NULL,
   country VARCHAR(50),
@@ -24,12 +45,13 @@ CREATE TABLE dbo.customers (
 );
 GO
 
-INSERT INTO dbo.customers (
-  id, 
-  first_name, 
-  country, 
+INSERT INTO dbo.customers
+  (
+  id,
+  first_name,
+  country,
   score
-)
+  )
 VALUES
   (1, 'Maria', 'Germany', 350),
   (2, ' John', 'USA', 900),
@@ -38,10 +60,12 @@ VALUES
   (5, 'Peter', 'USA', 0);
 GO
 
--- ======================================================
+-- =============================================================================
 -- Table: dbo.orders
--- ======================================================
-CREATE TABLE dbo.orders (
+-- =============================================================================
+
+CREATE TABLE dbo.orders
+(
   order_id INT NOT NULL,
   customer_id INT NOT NULL,
   order_date DATE,
@@ -50,12 +74,13 @@ CREATE TABLE dbo.orders (
 );
 GO
 
-INSERT INTO dbo.orders (
-  order_id, 
-  customer_id, 
-  order_date, 
+INSERT INTO dbo.orders
+  (
+  order_id,
+  customer_id,
+  order_date,
   sales
-)
+  )
 VALUES
   (1001, 1, '2021-01-11', 35),
   (1002, 2, '2021-04-05', 15),
@@ -63,21 +88,43 @@ VALUES
   (1004, 6, '2021-08-31', 10);
 GO
 
--- ======================================================
+-- =============================================================================
 -- Schema: sales
--- ======================================================
+-- =============================================================================
 
-IF SCHEMA_ID('sales') IS NOT NULL
+IF OBJECT_ID(N'sales.customers', N'U') IS NOT NULL
+  DROP TABLE sales.customers;
+GO
+
+IF OBJECT_ID(N'sales.employees', N'U') IS NOT NULL
+  DROP TABLE sales.employees;
+GO
+
+IF OBJECT_ID(N'sales.products', N'U') IS NOT NULL
+  DROP TABLE sales.products;
+GO
+
+IF OBJECT_ID(N'sales.orders', N'U') IS NOT NULL
+  DROP TABLE sales.orders;
+GO
+
+IF OBJECT_ID(N'sales.ordersarchive', N'U') IS NOT NULL
+  DROP TABLE sales.ordersarchive;
+GO
+
+IF SCHEMA_ID(N'sales') IS NOT NULL
   DROP SCHEMA sales;
 GO
 
 CREATE SCHEMA sales;
 GO
 
--- ======================================================
+-- =============================================================================
 -- Table: sales.customers
--- ======================================================
-CREATE TABLE sales.customers (
+-- =============================================================================
+
+CREATE TABLE sales.customers
+(
   customerid INT PRIMARY KEY,
   firstname VARCHAR(50),
   lastname VARCHAR(50),
@@ -86,13 +133,14 @@ CREATE TABLE sales.customers (
 );
 GO
 
-INSERT INTO sales.customers (
-  customerid, 
-  firstname, 
-  lastname, 
-  country, 
+INSERT INTO sales.customers
+  (
+  customerid,
+  firstname,
+  lastname,
+  country,
   score
-)
+  )
 VALUES
   (1, 'Jossef', 'Goldberg', 'Germany', 350),
   (2, 'Kevin', 'Brown', 'USA', 900),
@@ -101,10 +149,12 @@ VALUES
   (5, 'Anna', 'Adams', 'USA', NULL);
 GO
 
--- ======================================================
+-- =============================================================================
 -- Table: sales.employees
--- ======================================================
-CREATE TABLE sales.employees (
+-- =============================================================================
+
+CREATE TABLE sales.employees
+(
   employeeid INT PRIMARY KEY,
   firstname VARCHAR(50),
   lastname VARCHAR(50),
@@ -116,7 +166,8 @@ CREATE TABLE sales.employees (
 );
 GO
 
-INSERT INTO sales.employees (
+INSERT INTO sales.employees
+  (
   employeeid,
   firstname,
   lastname,
@@ -125,7 +176,7 @@ INSERT INTO sales.employees (
   gender,
   salary,
   managerid
-)
+  )
 VALUES
   (1, 'Frank', 'Lee', 'Marketing', '1988-12-05', 'M', 55000, NULL),
   (2, 'Kevin', 'Brown', 'Marketing', '1972-11-25', 'M', 65000, 1),
@@ -134,10 +185,12 @@ VALUES
   (5, 'Carol', 'Baker', 'Sales', '1982-02-11', 'F', 55000, 3);
 GO
 
--- ======================================================
+-- =============================================================================
 -- Table: sales.products
--- ======================================================
-CREATE TABLE sales.products (
+-- =============================================================================
+
+CREATE TABLE sales.products
+(
   productid INT PRIMARY KEY,
   product VARCHAR(50),
   category VARCHAR(50),
@@ -145,7 +198,13 @@ CREATE TABLE sales.products (
 );
 GO
 
-INSERT INTO sales.products (productid, product, category, price)
+INSERT INTO sales.products
+  (
+  productid,
+  product,
+  category,
+  price
+  )
 VALUES
   (101, 'Bottle', 'Accessories', 10),
   (102, 'Tire', 'Accessories', 15),
@@ -154,10 +213,12 @@ VALUES
   (105, 'Gloves', 'Clothing', 30);
 GO
 
--- ======================================================
+-- =============================================================================
 -- Table: sales.orders
--- ======================================================
-CREATE TABLE sales.orders (
+-- =============================================================================
+
+CREATE TABLE sales.orders
+(
   orderid INT PRIMARY KEY,
   productid INT,
   customerid INT,
@@ -173,7 +234,8 @@ CREATE TABLE sales.orders (
 );
 GO
 
-INSERT INTO sales.orders (
+INSERT INTO sales.orders
+  (
   orderid,
   productid,
   customerid,
@@ -186,7 +248,7 @@ INSERT INTO sales.orders (
   quantity,
   sales,
   creationtime
-)
+  )
 VALUES
   (1, 101, 2, 3, '2025-01-01', '2025-01-05', 'Delivered', '9833 Mt. Dias Blv.', '1226 Shoe St.', 1, 10, '2025-01-01 12:34:56'),
   (2, 102, 3, 3, '2025-01-05', '2025-01-10', 'Shipped', '250 Race Court', NULL, 1, 15, '2025-01-05 23:22:04'),
@@ -200,10 +262,12 @@ VALUES
   (10, 102, 3, 5, '2025-03-15', '2025-03-20', 'Shipped', NULL, NULL, 0, 60, '2025-03-16 23:25:15');
 GO
 
--- ======================================================
+-- =============================================================================
 -- Table: sales.ordersarchive
--- ======================================================
-CREATE TABLE sales.ordersarchive (
+-- =============================================================================
+
+CREATE TABLE sales.ordersarchive
+(
   orderid INT,
   productid INT,
   customerid INT,
@@ -219,7 +283,8 @@ CREATE TABLE sales.ordersarchive (
 );
 GO
 
-INSERT INTO sales.ordersarchive (
+INSERT INTO sales.ordersarchive
+  (
   orderid,
   productid,
   customerid,
@@ -232,7 +297,7 @@ INSERT INTO sales.ordersarchive (
   quantity,
   sales,
   creationtime
-)
+  )
 VALUES
   (1, 101, 2, 3, '2024-04-01', '2024-04-05', 'Shipped', '123 Main St', '456 Billing St', 1, 10, '2024-04-01 12:34:56'),
   (2, 102, 3, 3, '2024-04-05', '2024-04-10', 'Shipped', '456 Elm St', '789 Billing St', 1, 15, '2024-04-05 23:22:04'),

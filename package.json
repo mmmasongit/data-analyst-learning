@@ -1,0 +1,9 @@
+{
+  "devDependencies": {
+    "prettier": "^3.9.6"
+  },
+  "name": "data-analyst-learning",
+  "scripts": {},
+  "type": "module",
+  "version": "0.0.0"
+}

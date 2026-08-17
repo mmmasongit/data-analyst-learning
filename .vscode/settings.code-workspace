@@ -100,7 +100,6 @@
       "**/.svn": true,
       "**/.venv": true,
       "**/Thumbs.db": true,
-      "**/node_modules": true,
     },
     "mssql.connectionGroups": [
       {

@@ -27,8 +27,11 @@ GO
 
 -- =============================================================================
 -- Schema: dbo
+-- References:
+-- |  - dbo.books
 -- =============================================================================
 
+-- References: None
 IF OBJECT_ID(N'dbo.books', N'U') IS NOT NULL
   DROP TABLE dbo.books;
 GO
@@ -48,7 +51,6 @@ CREATE TABLE dbo.books
 GO
 
 BULK INSERT dbo.books
--- PATH: Absolute path and isn't portable between machines
 FROM 'C:\Users\mmmas\Workspace\data-analyst-learning\courses\dc_introduction_to_sql\datasets\csv\books.csv'
 WITH
 (

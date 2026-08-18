@@ -4,13 +4,11 @@ USE dc_intermediate_sql;
 Count the total number of records in the people table, aliasing the result as
 count_records.
 */
-SELECT
-  COUNT(*) as count_records
+SELECT COUNT(*) AS count_records
 FROM dbo.people;
 
 -- Count the number of birthdates in the people table.
-SELECT
-  COUNT(birthdate) as count_birthdate
+SELECT COUNT(birthdate) AS count_birthdate
 FROM dbo.people;
 
 -- Count the records for languages and countries represented in the films table.

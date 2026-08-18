@@ -22,24 +22,29 @@ GO
 
 -- =============================================================================
 -- Schema: dbo
+-- References:
+-- |  - dbo.films
+-- |  - dbo.people
+-- |  - dbo.reviews
+-- |  - dbo.roles
 -- =============================================================================
 
--- Reference: dbo.films, dbo.people
+-- References: dbo.films, dbo.people
 IF OBJECT_ID(N'dbo.roles', N'U') IS NOT NULL
   DROP TABLE dbo.roles;
 GO
 
--- Reference: dbo.films
+-- References: dbo.films
 IF OBJECT_ID(N'dbo.reviews', N'U') IS NOT NULL
   DROP TABLE dbo.reviews;
 GO
 
--- Reference: None
+-- References: None
 IF OBJECT_ID(N'dbo.people', N'U') IS NOT NULL
   DROP TABLE dbo.people;
 GO
 
--- Reference: None
+-- References: None
 IF OBJECT_ID(N'dbo.films', N'U') IS NOT NULL
   DROP TABLE dbo.films;
 GO
@@ -64,7 +69,6 @@ CREATE TABLE dbo.films
 GO
 
 BULK INSERT dbo.films
--- PATH: Absolute path and isn't portable between machines
 FROM 'C:\Users\mmmas\Workspace\data-analyst-learning\courses\dc_intermediate_sql\datasets\csv\films.csv'
 WITH
 (
@@ -80,7 +84,7 @@ GO
 
 -- =============================================================================
 -- Table: dbo.people
--- Reference: None
+-- References: None
 -- =============================================================================
 
 CREATE TABLE dbo.people
@@ -106,10 +110,11 @@ WITH
 );
 GO
 
--- -- ==========================================================================
--- -- Table: dbo.reviews
--- -- Reference: dbo.films
--- -- ==========================================================================
+-- =============================================================================
+-- Table: dbo.reviews
+-- References:
+-- |  - dbo.films
+-- =============================================================================
 
 CREATE TABLE dbo.reviews
 (
@@ -142,10 +147,12 @@ WITH
 );
 GO
 
--- -- =============================================================================
--- -- Table: dbo.roles
--- -- Reference: dbo.films, dbo.people
--- -- =============================================================================
+-- =============================================================================
+-- Table: dbo.roles
+-- References:
+-- |  - dbo.films
+-- |  - dbo.people
+-- =============================================================================
 
 CREATE TABLE dbo.roles
 (

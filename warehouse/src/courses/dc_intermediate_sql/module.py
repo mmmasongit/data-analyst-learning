@@ -1,8 +1,8 @@
 from pathlib import Path
 
 import pandas as pd
+from sqlalchemy import Engine
 
-from ...logger import PipelineLogger
 from ...schemas import DCIntermediateSql_CSVFile, IngestionOptions
 
 COURSE = "dc_intermediate_sql"
@@ -14,12 +14,9 @@ COURSE_DATASET_DIRECTORY = (
     / "csv"
 )
 DATAFRAMES: dict[DCIntermediateSql_CSVFile, pd.DataFrame] = {}
-LOGGER = PipelineLogger(COURSE)
 
 
-def bronze() -> None:
-    LOGGER.bronze()
-
+def bronze(engine: Engine) -> None:
     ingestion: dict[DCIntermediateSql_CSVFile, IngestionOptions] = {
         "films": {"header": None},
         "people": {"header": None},
@@ -35,10 +32,20 @@ def bronze() -> None:
         assert isinstance(dataframe, pd.DataFrame)
         DATAFRAMES[file] = dataframe
 
+        dataframe.to_sql(
+            con=engine,
+            if_exists="replace",
+            index=False,
+            name=file,
+            schema="bronze",
+        )
 
-def silver_films() -> None:
+
+def silver_films(engine: Engine) -> None:
+    df = DATAFRAMES["films"]
+
     # Step 1: Create header columns
-    DATAFRAMES["films"].columns = [
+    df.columns = [
         "id",
         "title",
         "release_year",
@@ -51,29 +58,45 @@ def silver_films() -> None:
     ]
 
     # Step 2: Change dtype from float64 to int64
-    DATAFRAMES["films"]["release_year"] = DATAFRAMES["films"][
-        "release_year"
-    ].astype("Int64")
+    df["release_year"] = df["release_year"].astype("Int64")
 
     # Step 3: Change dtype from float64 to int64
-    DATAFRAMES["films"]["duration"] = DATAFRAMES["films"]["duration"].astype(
-        "Int64"
+    df["duration"] = df["duration"].astype("Int64")
+
+    # Step 4: Write to database
+    df.to_sql(
+        con=engine,
+        if_exists="replace",
+        index=False,
+        name="films",
+        schema="silver",
     )
 
 
-def silver_people() -> None:
+def silver_people(engine: Engine) -> None:
+    df = DATAFRAMES["people"]
+
     # Step 1: Create header columns
-    DATAFRAMES["people"].columns = ["id", "name", "birthdate", "deathdate"]
+    df.columns = ["id", "name", "birthdate", "deathdate"]
 
-
-def silver_reviews() -> None:
-    # Step 1: Reload raw data and generate id column so the cell is safe to re-run
-    DATAFRAMES["reviews"].insert(
-        0, "id", range(1, len(DATAFRAMES["reviews"]) + 1)
+    # Step 2: Write to database
+    df.to_sql(
+        con=engine,
+        if_exists="replace",
+        index=False,
+        name="people",
+        schema="silver",
     )
+
+
+def silver_reviews(engine: Engine) -> None:
+    df = DATAFRAMES["reviews"]
+
+    # Step 1: Reload raw data and generate id column so the cell is safe to re-run
+    df.insert(0, "id", range(1, len(df) + 1))
 
     # Step 2: Create header columns
-    DATAFRAMES["reviews"].columns = [
+    df.columns = [
         "id",
         "film_id",
         "num_user",
@@ -84,71 +107,64 @@ def silver_reviews() -> None:
     ]
 
     # Step 3: Change `num_user` dtype from float64 to int64
-    DATAFRAMES["reviews"]["num_user"] = DATAFRAMES["reviews"][
-        "num_user"
-    ].astype("Int64")
+    df["num_user"] = df["num_user"].astype("Int64")
 
     # Step 4: Change `num_critic` dtype from float64 to int64
-    DATAFRAMES["reviews"]["num_critic"] = DATAFRAMES["reviews"][
-        "num_critic"
-    ].astype("Int64")
+    df["num_critic"] = df["num_critic"].astype("Int64")
 
     # Step 5: Round `imdb_score` to 2 decimal places
-    DATAFRAMES["reviews"]["imdb_score"] = DATAFRAMES["reviews"][
-        "imdb_score"
-    ].round(decimals=2)
+    df["imdb_score"] = df["imdb_score"].round(decimals=2)
+
+    # Step 6: Write to database
+    df.to_sql(
+        con=engine,
+        if_exists="replace",
+        index=False,
+        name="reviews",
+        schema="silver",
+    )
 
 
-def silver_roles() -> None:
+def silver_roles(engine: Engine) -> None:
+    df = DATAFRAMES["roles"]
+
     # Step 1: Create header columns
-    DATAFRAMES["roles"].columns = [
+    df.columns = [
         "id",
         "film_id",
         "person_id",
         "role",
     ]
 
+    # Step 2: Write to database
+    df.to_sql(
+        con=engine,
+        if_exists="replace",
+        index=False,
+        name="roles",
+        schema="silver",
+    )
 
-def silver() -> None:
-    LOGGER.silver()
 
-    silver_films()
-    silver_people()
-    silver_reviews()
-    silver_roles()
+def silver(engine: Engine) -> None:
+    silver_films(engine)
+    silver_people(engine)
+    silver_reviews(engine)
+    silver_roles(engine)
 
 
-def gold() -> None:
-    LOGGER.gold()
-
-    # Example of gold layer -> aggregation into business reports
-    # films_with_reviews: one row per review, enriched with its film's details
-    # films_with_reviews = DATAFRAMES["reviews"].merge(
-    #     DATAFRAMES["films"],
-    #     left_on="film_id",
-    #     right_on="id",
-    #     suffixes=("_review", "_film"),
-    # )
+def gold(engine: Engine) -> None:
+    pass
 
 
 def clean() -> None:
-    LOGGER.clean()
     DATAFRAMES.clear()
 
 
-def write() -> None:
-    LOGGER.write()
-    LOGGER.info(DATAFRAMES["films"].head(1))
-    LOGGER.info(DATAFRAMES["people"].head(1))
-    LOGGER.info(DATAFRAMES["reviews"].head(1))
-    LOGGER.info(DATAFRAMES["roles"].head(1))
-
-
-def run_etl() -> None:
+def run_etl(engine: Engine) -> None:
     try:
-        bronze()
-        silver()
-        gold()
-        write()
+        bronze(engine)
+        silver(engine)
+        gold(engine)
     finally:
         clean()

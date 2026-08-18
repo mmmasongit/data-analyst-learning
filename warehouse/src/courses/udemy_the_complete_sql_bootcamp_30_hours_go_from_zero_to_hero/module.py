@@ -1,8 +1,8 @@
 from pathlib import Path
 
 import pandas as pd
+from sqlalchemy import Engine
 
-from ...logger import PipelineLogger
 from ...schemas import (
     IngestionOptions,
     UdemyTheCompleteSqlBootcamp30HoursGoFromZeroToHero_CSVFile,
@@ -19,12 +19,9 @@ COURSE_DATASET_DIRECTORY = (
 DATAFRAMES: dict[
     UdemyTheCompleteSqlBootcamp30HoursGoFromZeroToHero_CSVFile, pd.DataFrame
 ] = {}
-LOGGER = PipelineLogger(COURSE)
 
 
 def bronze() -> None:
-    LOGGER.bronze()
-
     ingestion: dict[
         UdemyTheCompleteSqlBootcamp30HoursGoFromZeroToHero_CSVFile,
         IngestionOptions,
@@ -46,27 +43,26 @@ def bronze() -> None:
 
 
 def silver() -> None:
-    LOGGER.silver()
+    pass
 
 
 def gold() -> None:
-    LOGGER.gold()
+    pass
 
 
 def clean() -> None:
-    LOGGER.clean()
     DATAFRAMES.clear()
 
 
-def write() -> None:
-    LOGGER.write()
+def write(engine: Engine) -> None:
+    pass
 
 
-def run_etl() -> None:
+def run_etl(engine: Engine) -> None:
     try:
         bronze()
         silver()
         gold()
-        write()
+        write(engine)
     finally:
         clean()

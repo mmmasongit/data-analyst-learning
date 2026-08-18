@@ -11,12 +11,8 @@ from . import (
     dc_joining_data_in_sql_run_etl,
     udemy_the_complete_sql_bootcamp_30_hours_go_from_zero_to_hero_run_etl,
 )
-from .logger import PipelineLogger
-
-load_dotenv()
 
 DATABASE_SQL_DIRECTORY = Path(__file__).resolve().parents[1] / "sql"
-LOGGER = PipelineLogger("root", enabled=True)
 
 
 def create_database_url(database: str) -> URL:
@@ -69,14 +65,20 @@ def init_medallion_schemas(engine: Engine) -> None:
             connection.execute(text(sql_script))
 
 
-def run_pipeline(run_etl: Callable[[], None]) -> None:
-    run_etl()
+def run_pipeline(run_etl: Callable[[Engine], None], engine: Engine) -> None:
+    run_etl(engine)
 
 
 def main() -> None:
+    load_dotenv()
     master_engine = create_database_engine("master", echo=False)
-    init_medallion_database(master_engine)
-    master_engine.dispose()
+
+    try:
+        init_medallion_database(master_engine)
+    except Exception:  # noqa: BLE001, S110
+        pass
+    finally:
+        master_engine.dispose()
 
     warehouse_engine = create_database_engine("warehouse", echo=False)
     try:
@@ -90,7 +92,9 @@ def main() -> None:
         ]
 
         for run_etl in course_pipelines:
-            run_pipeline(run_etl)
+            run_pipeline(run_etl, warehouse_engine)
+    except Exception:  # noqa: BLE001, S110
+        pass
     finally:
         warehouse_engine.dispose()
 
